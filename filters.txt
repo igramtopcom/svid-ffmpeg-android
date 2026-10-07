@@ -1,6 +1,6 @@
 
 null,anull,format,aformat,scale,aresample,
-trim,atrim,setpts,asetpts,fps,pad,crop,setsar,setdar,setparams,
+trim,atrim,setpts,asetpts,tpad,fps,pad,crop,setsar,setdar,setparams,
 concat,split,asplit,amix,apad,anullsrc,color,
 volume,loudnorm,dynaudnorm,ebur128,ametadata,alimiter,arnndn,afftdn,highpass,lowpass,
 atempo,asetrate,palettegen,paletteuse,thumbnail,showinfo,
