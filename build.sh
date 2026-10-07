@@ -135,7 +135,9 @@ d=$(unpack "$(fetch "$MBEDTLS_URL" "$MBEDTLS_SHA256")" mbedtls)
 d=$(unpack "$(fetch "$FFMPEG_URL" "$FFMPEG_SHA256")" ffmpeg)
 ENCODERS=libx264,aac,libmp3lame,gif,mjpeg,png,pcm_s16le,wrapped_avframe
 FILTERS=$(tr -d ' \n' < "$HERE/filters.txt")
-CXXRT="-L$SYSROOT/usr/lib/$TRIPLE -lc++_static -lc++abi"  # zimg is C++
+# zimg is C++. libc++ by full path: a -L to that folder would also hand the
+# linker libc.a, libm.a and libz.a, and bionic must never be linked statically.
+CXXRT="$SYSROOT/usr/lib/$TRIPLE/libc++_static.a $SYSROOT/usr/lib/$TRIPLE/libc++abi.a"
 ( cd "$d"
   ./configure --prefix="$WORK/ffmpeg-out" \
     --enable-cross-compile --target-os=android --arch="$ARCH" --cpu="$CPU" \
@@ -170,6 +172,19 @@ cp "$WORK/ffmpeg-out/bin/ffmpeg" "$OUT/libffmpeg.so"
 cp "$WORK/ffmpeg-out/bin/ffprobe" "$OUT/libffprobe.so"
 "$STRIP" --strip-unneeded "$OUT/libffmpeg.so" "$OUT/libffprobe.so"
 python3 "$HERE/pack.py" "$WORK/stage" "$OUT/libffmpeg.zip.so"
+
+# Each file must load against the phone's own libc, and need nothing but the
+# system's libraries and these.
+ours=" $(cd "$STAGE" && echo *) "
+for f in "$OUT/libffmpeg.so" "$OUT/libffprobe.so" "$STAGE"/*; do
+  needed=$("$TC/bin/llvm-readelf" -d "$f" | sed -n 's/.*Shared library: \[\(.*\)\]//p')
+  echo "$needed" | grep -qx libc.so || { echo "$(basename "$f") does not need libc.so: bionic linked in?" >&2; exit 1; }
+  for n in $needed; do
+    case " libc.so libm.so libdl.so liblog.so libz.so " in *" $n "*) continue ;; esac
+    case "$ours" in *" $n "*) continue ;; esac
+    echo "$(basename "$f") needs $n, which a phone does not have" >&2; exit 1
+  done
+done
 
 # What went in, for the release notes and for the next audit.
 {
