@@ -177,7 +177,7 @@ python3 "$HERE/pack.py" "$WORK/stage" "$OUT/libffmpeg.zip.so"
 # system's libraries and these.
 ours=" $(cd "$STAGE" && echo *) "
 for f in "$OUT/libffmpeg.so" "$OUT/libffprobe.so" "$STAGE"/*; do
-  needed=$("$TC/bin/llvm-readelf" -d "$f" | sed -n 's/.*Shared library: \[\(.*\)\]//p')
+  needed=$("$TC/bin/llvm-readelf" -d "$f" | sed -n 's/.*Shared library: \[\(.*\)\]/\1/p')
   echo "$needed" | grep -qx libc.so || { echo "$(basename "$f") does not need libc.so: bionic linked in?" >&2; exit 1; }
   for n in $needed; do
     case " libc.so libm.so libdl.so liblog.so libz.so " in *" $n "*) continue ;; esac
