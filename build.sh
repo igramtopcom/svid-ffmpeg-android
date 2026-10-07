@@ -36,7 +36,11 @@ export STRIP=$TC/bin/llvm-strip
 export NM=$TC/bin/llvm-nm
 # 16 KB pages (Android 15+ devices may use them); r28 aligns by default, said
 # here so a different NDK cannot quietly undo it.
-export LDFLAGS="-Wl,-z,max-page-size=16384"
+# --exclude-libs: what the static libraries (x264, zimg, libc++, the NDK's
+# builtins) define stays inside each .so instead of being exported. armv7's
+# builtins carry symbols versioned LIBC_N, which ffmpeg's version scripts do
+# not know, and lld refuses to export them.
+export LDFLAGS="-Wl,-z,max-page-size=16384 -Wl,--exclude-libs,ALL"
 export CFLAGS="-O2 -fPIC"
 export CXXFLAGS="-O2 -fPIC"
 

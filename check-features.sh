@@ -26,7 +26,7 @@ need muxer mp4 mov ipod matroska webm mp3 adts ogg wav gif image2 mpegts null ff
 need parser h264 hevc aac mpegaudio vp9 av1 opus
 need bsf aac_adtstoasc h264_mp4toannexb hevc_mp4toannexb extract_extradata
 need protocol file pipe http https tcp tls hls crypto data concat
-need filter abuffer abuffersink buffer buffersink null anull format aformat scale aresample \
+need filter null anull format aformat scale aresample \
   trim atrim setpts asetpts fps pad setparams concat split asplit apad anullsrc color \
   volume loudnorm dynaudnorm ebur128 ametadata alimiter arnndn afftdn highpass atempo asetrate \
   palettegen paletteuse thumbnail showinfo zscale tonemap

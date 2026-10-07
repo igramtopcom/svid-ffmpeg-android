@@ -23,7 +23,7 @@ jobs:
       matrix:
         abi: [arm64-v8a, armeabi-v7a]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Tools
         run: |
